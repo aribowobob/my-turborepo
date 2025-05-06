@@ -1,10 +1,14 @@
-import { Router } from "express";
-import { fetchUserData, updateUserData } from "../controller/userController";
+import express from "express";
+import { api } from "../controller/api";
 import { authMiddleware } from "../middleware/authMiddleware";
 
-const router = Router();
+const router = express.Router();
 
-router.get("/fetch-user-data", authMiddleware, fetchUserData);
-router.post("/update-user-data", authMiddleware, updateUserData);
+// Apply auth middleware to all routes
+router.use(authMiddleware);
+
+// User endpoints
+router.get("/user", api.fetchUserData);
+router.put("/update-user-data", api.updateUserData);
 
 export default router;
