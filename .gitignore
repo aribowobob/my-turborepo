@@ -36,3 +36,11 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Firebase
+firebase-debug.log
+firestore-debug.log
+dataconnect-debug.log
+firebase-debug.*.json
+dataconnect/
+dataconnect-generated/

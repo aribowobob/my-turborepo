@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import admin from "firebase-admin";
+import { auth } from "../config/firebaseConfig";
 
 export async function authMiddleware(
   req: Request,
@@ -14,8 +14,19 @@ export async function authMiddleware(
 
   const idToken = authHeader.split("Bearer ")[1];
 
+  // Bypass authentication for testing with TEST_TOKEN
+  if (process.env.NODE_ENV === "development" && idToken === "TEST_TOKEN") {
+    (req as any).user = {
+      id: "test-user-id",
+      email: "test@example.com",
+      name: "Test User",
+    };
+    return next();
+  }
+
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    // Menggunakan auth dari konfigurasi yang diimpor
+    const decodedToken = await auth.verifyIdToken(idToken);
     (req as any).user = decodedToken;
     next();
   } catch (error) {

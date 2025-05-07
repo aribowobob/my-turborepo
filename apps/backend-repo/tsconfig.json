@@ -9,5 +9,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "routes", "middleware", "controller", "config"] // Include all your directories with TS files
+  "include": ["src", "routes", "middleware", "controller", "config"]
 }

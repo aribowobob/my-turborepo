@@ -20,5 +20,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector"
+  }
 }

@@ -4,7 +4,7 @@ import { userCollection } from "../repository/userCollection";
 export const api = {
   async fetchUserData(req: Request, res: Response) {
     try {
-      const userId = (req as any).user.uid;
+      const userId = (req as any).user.id;
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -25,7 +25,7 @@ export const api = {
 
   async updateUserData(req: Request, res: Response) {
     try {
-      const userId = (req as any).user.uid;
+      const userId = (req as any).user.id;
       const userData = req.body;
 
       if (!userId) {
