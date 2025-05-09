@@ -1,95 +1,298 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useState } from "react";
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  Button,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Drawer,
+  Avatar,
+  Menu,
+  MenuItem,
+  Grid,
+} from "@mui/material";
+import {
+  Dashboard as DashboardIcon,
+  Person as PersonIcon,
+  Notifications as NotificationsIcon,
+  Menu as MenuIcon,
+  Assignment as AssignmentIcon,
+  AccountCircle as AccountCircleIcon,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon,
+} from "@mui/icons-material";
+import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Mock data for dashboard
+  const recentActivities = [
+    { id: 1, activity: "Document uploaded", time: "2 hours ago" },
+    { id: 2, activity: "Task completed", time: "5 hours ago" },
+    { id: 3, activity: "Meeting scheduled", time: "Yesterday" },
+  ];
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Failed to logout:", error);
+    }
+  };
+
+  // If not logged in, redirect to login (this is handled by middleware.ts)
+
+  const menuId = "primary-account-menu";
+  const isMenuOpen = Boolean(anchorEl);
+
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      id={menuId}
+      keepMounted
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={handleMenuClose}>
+        <ListItemIcon>
+          <AccountCircleIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Profile</ListItemText>
+      </MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <ListItemIcon>
+          <SettingsIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Settings</ListItemText>
+      </MenuItem>
+      <Divider />
+      <MenuItem onClick={handleLogout}>
+        <ListItemIcon>
+          <LogoutIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Logout</ListItemText>
+      </MenuItem>
+    </Menu>
+  );
+
+  const drawer = (
+    <Box sx={{ width: 250 }} role="presentation">
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h6" component="div">
+          Dashboard
+        </Typography>
+      </Box>
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              <DashboardIcon />
+            </ListItemIcon>
+            <ListItemText primary="Dashboard" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              <PersonIcon />
+            </ListItemIcon>
+            <ListItemText primary="Profile" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              <AssignmentIcon />
+            </ListItemIcon>
+            <ListItemText primary="Tasks" />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2 }}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            My Dashboard
+          </Typography>
+          <IconButton color="inherit" aria-label="notifications">
+            <NotificationsIcon />
+          </IconButton>
+          <IconButton
+            edge="end"
+            aria-label="account of current user"
+            aria-controls={menuId}
+            aria-haspopup="true"
+            onClick={handleProfileMenuOpen}
+            color="inherit"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.dark" }}>
+              {user?.email?.charAt(0).toUpperCase() || "U"}
+            </Avatar>
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
+        {drawer}
+      </Drawer>
+
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+        <Grid container spacing={3}>
+          {/* Welcome Card */}
+          <Grid size={{ xs: 12 }}>
+            <Paper sx={{ p: 3, display: "flex", flexDirection: "column" }}>
+              <Typography variant="h4" gutterBottom>
+                Welcome, {user?.email?.split("@")[0] || "User"}!
+              </Typography>
+              <Typography variant="body1">
+                This is your personal dashboard. Here you can manage your
+                account, view recent activities, and access important features.
+              </Typography>
+            </Paper>
+          </Grid>
+
+          {/* Stats Overview */}
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Tasks
+                </Typography>
+                <Typography variant="h5" component="div">
+                  5 Pending
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  2 completed this week
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Messages
+                </Typography>
+                <Typography variant="h5" component="div">
+                  3 Unread
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  8 total messages
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Notifications
+                </Typography>
+                <Typography variant="h5" component="div">
+                  7 New
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Since yesterday
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Recent Activities */}
+          <Grid size={{ xs: 12 }}>
+            <Paper sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Recent Activities</Typography>
+                <Button size="small">View All</Button>
+              </Box>
+              <List>
+                {recentActivities.map((activity) => (
+                  <div key={activity.id}>
+                    <ListItem>
+                      <ListItemText
+                        primary={activity.activity}
+                        secondary={activity.time}
+                      />
+                    </ListItem>
+                    {activity.id !== recentActivities.length && <Divider />}
+                  </div>
+                ))}
+              </List>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+
+      <Box
+        component="footer"
+        sx={{ p: 2, bgcolor: "background.paper", mt: "auto" }}
+      >
+        <Typography variant="body2" color="text.secondary" align="center">
+          © {new Date().getFullYear()} My Dashboard App
+        </Typography>
+      </Box>
+
+      {renderMenu}
+    </Box>
   );
 }
