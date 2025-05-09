@@ -41,4 +41,24 @@ export const userCollection = {
       throw error;
     }
   },
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      const usersSnapshot = await db
+        .collection(USERS_COLLECTION)
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+      if (usersSnapshot.empty) {
+        return null;
+      }
+
+      const userDoc = usersSnapshot.docs[0];
+      return { id: userDoc.id, ...userDoc.data() } as User;
+    } catch (error) {
+      console.error("Error fetching user by email:", error);
+      throw error;
+    }
+  },
 };

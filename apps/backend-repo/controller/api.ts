@@ -16,7 +16,9 @@ export const api = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      return res.status(200).json(userData);
+      const { password: _, ...userWithoutPassword } = userData;
+
+      return res.status(200).json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user data:", error);
       return res.status(500).json({ message: "Internal server error", error });
