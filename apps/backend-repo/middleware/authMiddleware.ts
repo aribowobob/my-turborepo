@@ -16,6 +16,7 @@ export async function authMiddleware(
 
   // Bypass authentication for testing with TEST_TOKEN
   if (process.env.NODE_ENV === "development" && idToken === "TEST_TOKEN") {
+    // Simulate a decoded token for testing purposes
     (req as any).user = {
       id: "test-user-id",
       email: "test@example.com",
@@ -25,7 +26,7 @@ export async function authMiddleware(
   }
 
   try {
-    // Menggunakan auth dari konfigurasi yang diimpor
+    // Verify the token using Firebase Admin SDK
     const decodedToken = await auth.verifyIdToken(idToken);
     (req as any).user = decodedToken;
     next();

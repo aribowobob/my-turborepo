@@ -1,0 +1,45 @@
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+  background-color: var(--background);
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background-color: var(--background);
+  border: 1px solid var(--gray-alpha-200);
+}
+
+.loginHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.loginButtonContainer {
+  margin-top: 1rem;
+}
+
+.loginFooter {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .loginCard {
+    padding: 1.5rem;
+  }
+}
