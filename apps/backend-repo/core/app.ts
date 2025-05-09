@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import userRoutes from "../routes/userRoutes";
 import authRoutes from "../routes/authRoutes";
+import seedRoutes from "../routes/seedRoutes";
 
 // Create Express application
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/seed", seedRoutes);
 app.use("/api", userRoutes);
 
 export default app;

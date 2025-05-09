@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "../config/firebaseConfig";
+import { verifyToken } from "../utils/authUtils";
 
 export async function authMiddleware(
   req: Request,
@@ -12,10 +12,10 @@ export async function authMiddleware(
     return res.status(401).json({ message: "No token provided" });
   }
 
-  const idToken = authHeader.split("Bearer ")[1];
+  const token = authHeader.split("Bearer ")[1];
 
   // Bypass authentication for testing with TEST_TOKEN
-  if (process.env.NODE_ENV === "development" && idToken === "TEST_TOKEN") {
+  if (process.env.NODE_ENV === "development" && token === "TEST_TOKEN") {
     // Simulate a decoded token for testing purposes
     (req as any).user = {
       id: "test-user-id",
@@ -26,8 +26,7 @@ export async function authMiddleware(
   }
 
   try {
-    // Verify the token using Firebase Admin SDK
-    const decodedToken = await auth.verifyIdToken(idToken);
+    const decodedToken = verifyToken(token);
     (req as any).user = decodedToken;
     next();
   } catch (error) {
