@@ -6,15 +6,12 @@ import {
   Paper,
   Typography,
   Box,
-  Card,
-  CardContent,
   List,
   ListItem,
   ListItemButton,
   ListItemText,
   ListItemIcon,
   Divider,
-  Button,
   AppBar,
   Toolbar,
   IconButton,
@@ -42,13 +39,6 @@ export default function Home() {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  // Mock data for dashboard
-  const recentActivities = [
-    { id: 1, activity: "Document uploaded", time: "2 hours ago" },
-    { id: 2, activity: "Task completed", time: "5 hours ago" },
-    { id: 3, activity: "Meeting scheduled", time: "Yesterday" },
-  ];
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -199,85 +189,6 @@ export default function Home() {
                 This is your personal dashboard. Here you can manage your
                 account, view recent activities, and access important features.
               </Typography>
-            </Paper>
-          </Grid>
-
-          {/* Stats Overview */}
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Tasks
-                </Typography>
-                <Typography variant="h5" component="div">
-                  5 Pending
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  2 completed this week
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Messages
-                </Typography>
-                <Typography variant="h5" component="div">
-                  3 Unread
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  8 total messages
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Notifications
-                </Typography>
-                <Typography variant="h5" component="div">
-                  7 New
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Since yesterday
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Recent Activities */}
-          <Grid size={{ xs: 12 }}>
-            <Paper sx={{ p: 2 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">Recent Activities</Typography>
-                <Button size="small">View All</Button>
-              </Box>
-              <List>
-                {recentActivities.map((activity) => (
-                  <div key={activity.id}>
-                    <ListItem>
-                      <ListItemText
-                        primary={activity.activity}
-                        secondary={activity.time}
-                      />
-                    </ListItem>
-                    {activity.id !== recentActivities.length && <Divider />}
-                  </div>
-                ))}
-              </List>
             </Paper>
           </Grid>
         </Grid>

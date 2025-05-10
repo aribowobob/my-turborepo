@@ -1,8 +1,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --gray-alpha-200: #e5e7eb;
-  --button-primary-hover: #e17100;
+  --primary: #ff8c00;
+  --primary-foreground: #171717;
+  --primary-hover: #e17100;
+  --border: #e5e7eb;
 }
 
 html,

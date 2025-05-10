@@ -13,8 +13,9 @@ import {
   Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
+import { useAuth } from "@/context/AuthContext";
+
 import styles from "./login.module.css";
-import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -116,14 +117,6 @@ export default function Login() {
               fullWidth
               size="large"
               disabled={loading}
-              sx={{
-                py: 1.5,
-                bgcolor: "var(--foreground)",
-                color: "var(--background)",
-                "&:hover": {
-                  bgcolor: "var(--button-primary-hover)",
-                },
-              }}
             >
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
