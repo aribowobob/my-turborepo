@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Container,
   Paper,
@@ -24,7 +24,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   Person as PersonIcon,
-  Notifications as NotificationsIcon,
   Menu as MenuIcon,
   Assignment as AssignmentIcon,
   AccountCircle as AccountCircleIcon,
@@ -36,9 +35,8 @@ import { useRouter } from "next/navigation";
 import { UpdateProfileForm } from "../components/organisms/UpdateProfileForm";
 import { PrimaryButton } from "../components/atoms/Button";
 import { Snackbar } from "../components/atoms/Snackbar";
-import Cookies from "js-cookie";
 import { useAppDispatch } from "../store/hooks";
-import { setUser } from "../store/actions";
+import { getUserData, updateUserData } from "../store/actions";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -49,8 +47,6 @@ export default function Home() {
 
   // State for update profile modal
   const [updateProfileOpen, setUpdateProfileOpen] = useState(false);
-  const [profileData, setProfileData] = useState({ name: "", email: "" });
-  const [isLoading, setIsLoading] = useState(false);
 
   // State for snackbar notifications
   const [snackbar, setSnackbar] = useState({
@@ -58,20 +54,6 @@ export default function Home() {
     message: "",
     severity: "success" as "success" | "error" | "info" | "warning",
   });
-
-  // Fetch the backend URL from environment variable
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
-
-  useEffect(() => {
-    // Initialize profile data from user context
-    if (user) {
-      setProfileData({
-        name: user.name || "",
-        email: user.email || "",
-      });
-    }
-  }, [user]);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -96,26 +78,16 @@ export default function Home() {
 
   const handleOpenUpdateProfile = async () => {
     try {
-      // Fetch the latest user data from API
-      setIsLoading(true);
-      const token = Cookies.get("auth-token");
+      const resultAction = await dispatch(getUserData());
 
-      const response = await fetch(`${backendUrl}/api/user`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setProfileData({
-          name: userData.name || "",
-          email: userData.email || "",
-        });
+      if (getUserData.fulfilled.match(resultAction)) {
         setUpdateProfileOpen(true);
       } else {
-        throw new Error("Failed to fetch user data");
+        setSnackbar({
+          open: true,
+          message: "Failed to load profile data",
+          severity: "error",
+        });
       }
     } catch {
       setSnackbar({
@@ -123,49 +95,27 @@ export default function Home() {
         message: "Failed to load profile data",
         severity: "error",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleUpdateProfile = async (data: { name: string; email: string }) => {
     try {
-      setIsLoading(true);
-      const token = Cookies.get("auth-token");
+      const resultAction = await dispatch(updateUserData({ name: data.name }));
 
-      // Only send name field in the update request
-      const response = await fetch(`${backendUrl}/api/update-user-data`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: data.name }),
-      });
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-
-        // Update local state with new data
-        setProfileData({
-          name: updatedUser.name,
-          email: updatedUser.email,
-        });
-
-        // Update user state in Redux
-        dispatch(setUser(updatedUser));
-
-        // Close the modal
+      if (updateUserData.fulfilled.match(resultAction)) {
         setUpdateProfileOpen(false);
 
-        // Show success message
         setSnackbar({
           open: true,
           message: "Profile updated successfully",
           severity: "success",
         });
       } else {
-        throw new Error("Failed to update profile");
+        setSnackbar({
+          open: true,
+          message: "Failed to update profile",
+          severity: "error",
+        });
       }
     } catch {
       setSnackbar({
@@ -173,8 +123,6 @@ export default function Home() {
         message: "Failed to update profile",
         severity: "error",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -182,83 +130,8 @@ export default function Home() {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
-  // If not logged in, redirect to login (this is handled by middleware.ts)
-
   const menuId = "primary-account-menu";
   const isMenuOpen = Boolean(anchorEl);
-
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      id={menuId}
-      keepMounted
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>
-        <ListItemIcon>
-          <AccountCircleIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Profile</ListItemText>
-      </MenuItem>
-      <MenuItem onClick={handleMenuClose}>
-        <ListItemIcon>
-          <SettingsIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Settings</ListItemText>
-      </MenuItem>
-      <Divider />
-      <MenuItem onClick={handleLogout}>
-        <ListItemIcon>
-          <LogoutIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>Logout</ListItemText>
-      </MenuItem>
-    </Menu>
-  );
-
-  const drawer = (
-    <Box sx={{ width: 250 }} role="presentation">
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography variant="h6" component="div">
-          Dashboard
-        </Typography>
-      </Box>
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <PersonIcon />
-            </ListItemIcon>
-            <ListItemText primary="Profile" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <AssignmentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Tasks" />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
-  );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -276,9 +149,7 @@ export default function Home() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             My Dashboard
           </Typography>
-          <IconButton color="inherit" aria-label="notifications">
-            <NotificationsIcon />
-          </IconButton>
+
           <IconButton
             edge="end"
             aria-label="account of current user"
@@ -288,14 +159,53 @@ export default function Home() {
             color="inherit"
           >
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.dark" }}>
-              {user?.email?.charAt(0).toUpperCase() || "U"}
+              {user?.name?.charAt(0).toUpperCase() || ""}
             </Avatar>
           </IconButton>
         </Toolbar>
       </AppBar>
 
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
-        {drawer}
+        <Box sx={{ width: 250 }} role="presentation">
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="h6" component="div">
+              Dashboard
+            </Typography>
+          </Box>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <DashboardIcon />
+                </ListItemIcon>
+                <ListItemText primary="Dashboard" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton>
+                <ListItemIcon>
+                  <AssignmentIcon />
+                </ListItemIcon>
+                <ListItemText primary="Tasks" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
       </Drawer>
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
@@ -306,7 +216,7 @@ export default function Home() {
               <Typography variant="h4" gutterBottom>
                 Welcome, {user?.name || user?.email?.split("@")[0] || "User"}!
               </Typography>
-              <Typography variant="body1" paragraph>
+              <Typography variant="body1">
                 This is your personal dashboard. Here you can manage your
                 account, view recent activities, and access important features.
               </Typography>
@@ -338,9 +248,7 @@ export default function Home() {
       <UpdateProfileForm
         open={updateProfileOpen}
         onClose={() => setUpdateProfileOpen(false)}
-        initialData={profileData}
         onSubmit={handleUpdateProfile}
-        isLoading={isLoading}
       />
 
       <Snackbar
@@ -350,7 +258,33 @@ export default function Home() {
         onClose={handleCloseSnackbar}
       />
 
-      {renderMenu}
+      <Menu
+        anchorEl={anchorEl}
+        id={menuId}
+        keepMounted
+        open={isMenuOpen}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleMenuClose}>
+          <ListItemIcon>
+            <AccountCircleIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Profile</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleMenuClose}>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Logout</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

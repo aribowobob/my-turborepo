@@ -98,3 +98,110 @@ export const logout = createAsyncThunk(
     }
   }
 );
+
+export const getUserData = createAsyncThunk(
+  "auth/getUserData",
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const token = Cookies.get("auth-token");
+
+      if (!token) {
+        dispatch(setLoading(false));
+        dispatch(setError("No authentication token found"));
+        return rejectWithValue("No authentication token found");
+      }
+
+      const response = await fetch(`${backendUrl}/api/user`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 401 || response.status === 403) {
+          Cookies.remove("auth-token");
+        }
+
+        dispatch(setLoading(false));
+        dispatch(setError(errorData.message || "Failed to fetch user data"));
+        return rejectWithValue(
+          errorData.message || "Failed to fetch user data"
+        );
+      }
+
+      const userData = await response.json();
+
+      // Update user state in Redux
+      dispatch(setUser(userData));
+      dispatch(setLoading(false));
+
+      return userData;
+    } catch (error) {
+      dispatch(setLoading(false));
+      dispatch(
+        setError((error as Error).message || "Failed to fetch user data")
+      );
+      return rejectWithValue(
+        (error as Error).message || "Failed to fetch user data"
+      );
+    }
+  }
+);
+
+export const updateUserData = createAsyncThunk(
+  "auth/updateUserData",
+  async (userData: Partial<User>, { rejectWithValue, dispatch }) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const token = Cookies.get("auth-token");
+
+      if (!token) {
+        dispatch(setLoading(false));
+        dispatch(setError("No authentication token found"));
+        return rejectWithValue("No authentication token found");
+      }
+
+      const response = await fetch(`${backendUrl}/api/update-user-data`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        dispatch(setLoading(false));
+        dispatch(setError(errorData.message || "Failed to update user data"));
+        return rejectWithValue(
+          errorData.message || "Failed to update user data"
+        );
+      }
+
+      const updatedUserData = await response.json();
+
+      // Update user state in Redux
+      dispatch(setUser(updatedUserData));
+      dispatch(setLoading(false));
+
+      return updatedUserData;
+    } catch (error) {
+      dispatch(setLoading(false));
+      dispatch(
+        setError((error as Error).message || "Failed to update user data")
+      );
+      return rejectWithValue(
+        (error as Error).message || "Failed to update user data"
+      );
+    }
+  }
+);
