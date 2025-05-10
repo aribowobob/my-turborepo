@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   login as loginAction,
   logout as logoutAction,
   setUser,
-} from "@/store/authSlice";
+} from "../store/actions";
 import { User } from "../../../packages/shared/user";
 
 interface AuthContextType {
@@ -43,13 +43,14 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
+
+  // Get the backend URL from environment variable
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
   useEffect(() => {
-    // Check if we have a token in cookies
+    // Check if we have a token in cookies on page load
     const token = Cookies.get("auth-token");
-
     if (token) {
       // If we have a token, we can fetch the current user data
       fetchUserData(token);
