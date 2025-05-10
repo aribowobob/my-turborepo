@@ -20,10 +20,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, loading, error } = useAuth();
   const router = useRouter();
 
   const handleTogglePasswordVisibility = () => {
@@ -32,20 +30,13 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
 
     try {
       await signIn(email, password);
       router.push("/");
     } catch (error: Error | unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again.";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+      // Error state handled by Redux
+      console.error("Login error:", error);
     }
   };
 
@@ -124,7 +115,7 @@ export default function Login() {
               variant="contained"
               fullWidth
               size="large"
-              disabled={isLoading}
+              disabled={loading}
               sx={{
                 py: 1.5,
                 bgcolor: "var(--foreground)",
@@ -134,7 +125,7 @@ export default function Login() {
                 },
               }}
             >
-              {isLoading ? (
+              {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Login"

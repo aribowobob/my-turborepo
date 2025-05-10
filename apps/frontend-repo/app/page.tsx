@@ -193,7 +193,7 @@ export default function Home() {
           <Grid size={{ xs: 12 }}>
             <Paper sx={{ p: 3, display: "flex", flexDirection: "column" }}>
               <Typography variant="h4" gutterBottom>
-                Welcome, {user?.email?.split("@")[0] || "User"}!
+                Welcome, {user?.name || user?.email?.split("@")[0] || "User"}!
               </Typography>
               <Typography variant="body1">
                 This is your personal dashboard. Here you can manage your

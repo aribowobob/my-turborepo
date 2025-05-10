@@ -1,28 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-import { auth } from "../config/firebaseConfig";
+import React, { createContext, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  login as loginAction,
+  logout as logoutAction,
+  setUser,
+} from "@/store/authSlice";
+import { User } from "../../../packages/shared/user";
 
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
   signIn: (email: string, password: string) => Promise<User>;
-  signUp: (email: string, password: string) => Promise<User>;
+  signUp: () => Promise<User>;
   logout: () => Promise<void>;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
   signIn: async () => {
     throw new Error("Not implemented");
   },
@@ -32,87 +26,82 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {
     throw new Error("Not implemented");
   },
-  error: null,
 });
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  const { user, loading, error } = useAppSelector((state) => state.auth);
+
+  // Return both the context functions and the Redux state
+  return {
+    ...context,
+    user,
+    loading,
+    error,
+  };
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const backendUrl =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      setLoading(false);
+    // Check if we have a token in cookies
+    const token = Cookies.get("auth-token");
 
-      if (user) {
-        // Get the token and store it in a cookie
-        const token = await user.getIdToken();
-        Cookies.set("auth-token", token, { expires: 7 }); // expires in 7 days
-      } else {
-        // Remove the cookie when the user is logged out
-        Cookies.remove("auth-token");
-      }
-    });
-
-    return () => unsubscribe();
+    if (token) {
+      // If we have a token, we can fetch the current user data
+      fetchUserData(token);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signIn = async (email: string, password: string): Promise<User> => {
+  // Function to fetch user data with the token
+  const fetchUserData = async (token: string) => {
     try {
-      setError(null);
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      return userCredential.user;
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to sign in";
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      const response = await fetch(`${backendUrl}/api/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        dispatch(setUser(userData));
+      } else {
+        // If the request fails, remove the token as it might be invalid
+        Cookies.remove("auth-token");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      Cookies.remove("auth-token");
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<User> => {
-    try {
-      setError(null);
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      return userCredential.user;
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to sign up";
-      setError(errorMessage);
-      throw new Error(errorMessage);
+  const signIn = async (email: string, password: string): Promise<User> => {
+    const resultAction = await dispatch(loginAction({ email, password }));
+
+    if (loginAction.fulfilled.match(resultAction)) {
+      return resultAction.payload;
+    } else {
+      throw new Error((resultAction.payload as string) || "Login failed");
     }
+  };
+
+  const signUp = async (): Promise<User> => {
+    // This would need to be implemented with a backend registration endpoint
+    throw new Error("Sign up not implemented");
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      setError(null);
-      await signOut(auth);
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to sign out";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
+    await dispatch(logoutAction());
   };
 
   const value = {
-    user,
-    loading,
     signIn,
     signUp,
     logout,
-    error,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
