@@ -19,10 +19,9 @@ export const Snackbar: React.FC<SnackbarProps> = ({
   onClose,
   ...props
 }) => {
-  // Create separate handler for Alert's onClose to fix type mismatch
   const handleAlertClose = (event: React.SyntheticEvent<Element, Event>) => {
     if (onClose) {
-      onClose(event, "clickaway");
+      onClose(event, "escapeKeyDown");
     }
   };
 

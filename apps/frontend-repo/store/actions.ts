@@ -69,9 +69,13 @@ export const login = createAsyncThunk(
 
       return data.user;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Login failed";
+
       dispatch(setLoading(false));
-      dispatch(setError((error as Error).message || "Login failed"));
-      return rejectWithValue((error as Error).message || "Login failed");
+      dispatch(setError(errorMessage));
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -92,9 +96,13 @@ export const logout = createAsyncThunk(
 
       return null;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Logout failed";
+
       dispatch(setLoading(false));
-      dispatch(setError((error as Error).message || "Logout failed"));
-      return rejectWithValue((error as Error).message || "Logout failed");
+      dispatch(setError(errorMessage));
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -110,7 +118,6 @@ export const getUserData = createAsyncThunk(
 
       if (!token) {
         dispatch(setLoading(false));
-        dispatch(setError("No authentication token found"));
         return rejectWithValue("No authentication token found");
       }
 
@@ -143,13 +150,13 @@ export const getUserData = createAsyncThunk(
 
       return userData;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch user data";
+
       dispatch(setLoading(false));
-      dispatch(
-        setError((error as Error).message || "Failed to fetch user data")
-      );
-      return rejectWithValue(
-        (error as Error).message || "Failed to fetch user data"
-      );
+      dispatch(setError(errorMessage));
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -195,13 +202,13 @@ export const updateUserData = createAsyncThunk(
 
       return updatedUserData;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update user data";
+
       dispatch(setLoading(false));
-      dispatch(
-        setError((error as Error).message || "Failed to update user data")
-      );
-      return rejectWithValue(
-        (error as Error).message || "Failed to update user data"
-      );
+      dispatch(setError(errorMessage));
+
+      return rejectWithValue(errorMessage);
     }
   }
 );

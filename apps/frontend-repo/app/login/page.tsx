@@ -11,9 +11,9 @@ import {
   Box,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import { useAuth } from "../../context/AuthContext";
-import { FormField } from "../../components/molecules/FormField";
-import { PrimaryButton } from "../../components/atoms/Button";
+import { useAuth } from "@/context/AuthContext";
+import { FormField } from "@/components/molecules/FormField";
+import { PrimaryButton } from "@/components/atoms/Button";
 
 import styles from "./login.module.css";
 
@@ -58,8 +58,11 @@ export default function Login() {
       await signIn(email, password);
       router.push("/");
     } catch (error: Error | unknown) {
-      // Error state handled by Redux
-      console.error("Login error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again.";
+      console.error(errorMessage);
     }
   };
 

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "@/store/Providers";
+import { SnackbarProvider } from "@/context/SnackbarContext";
 
 import "./globals.css";
 
@@ -30,7 +31,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
-          <AuthProvider>{children}</AuthProvider>
+          <SnackbarProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </SnackbarProvider>
         </Providers>
       </body>
     </html>

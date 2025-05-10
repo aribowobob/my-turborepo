@@ -34,26 +34,20 @@ import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { UpdateProfileForm } from "../components/organisms/UpdateProfileForm";
 import { PrimaryButton } from "../components/atoms/Button";
-import { Snackbar } from "../components/atoms/Snackbar";
 import { useAppDispatch } from "../store/hooks";
 import { getUserData, updateUserData } from "../store/actions";
+import { useSnackbarContext } from "@/context/SnackbarContext";
 
 export default function Home() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { showSnackbar } = useSnackbarContext();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // State for update profile modal
   const [updateProfileOpen, setUpdateProfileOpen] = useState(false);
-
-  // State for snackbar notifications
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error" | "info" | "warning",
-  });
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -72,6 +66,7 @@ export default function Home() {
       await logout();
       router.push("/login");
     } catch (error) {
+      showSnackbar("Failed to logout", "error");
       console.error("Failed to logout:", error);
     }
   };
@@ -83,18 +78,10 @@ export default function Home() {
       if (getUserData.fulfilled.match(resultAction)) {
         setUpdateProfileOpen(true);
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to load profile data",
-          severity: "error",
-        });
+        showSnackbar("Failed to load profile data", "error");
       }
     } catch {
-      setSnackbar({
-        open: true,
-        message: "Failed to load profile data",
-        severity: "error",
-      });
+      showSnackbar("Failed to load profile data", "error");
     }
   };
 
@@ -104,30 +91,13 @@ export default function Home() {
 
       if (updateUserData.fulfilled.match(resultAction)) {
         setUpdateProfileOpen(false);
-
-        setSnackbar({
-          open: true,
-          message: "Profile updated successfully",
-          severity: "success",
-        });
+        showSnackbar("Profile updated successfully", "success");
       } else {
-        setSnackbar({
-          open: true,
-          message: "Failed to update profile",
-          severity: "error",
-        });
+        showSnackbar("Failed to update profile", "error");
       }
     } catch {
-      setSnackbar({
-        open: true,
-        message: "Failed to update profile",
-        severity: "error",
-      });
+      showSnackbar("Failed to update profile", "error");
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   const menuId = "primary-account-menu";
@@ -249,13 +219,6 @@ export default function Home() {
         open={updateProfileOpen}
         onClose={() => setUpdateProfileOpen(false)}
         onSubmit={handleUpdateProfile}
-      />
-
-      <Snackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={handleCloseSnackbar}
       />
 
       <Menu
