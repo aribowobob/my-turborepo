@@ -2,7 +2,7 @@
 
 import { TextField, TextFieldProps } from "@mui/material";
 
-interface FormTextFieldProps extends Omit<TextFieldProps, "children"> {
+export interface FormTextFieldProps extends Omit<TextFieldProps, "children"> {
   error?: boolean;
   helperText?: React.ReactNode;
 }

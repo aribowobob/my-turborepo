@@ -2,12 +2,12 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   login as loginAction,
   logout as logoutAction,
   setUser,
-} from "../store/actions";
+} from "@/store/actions";
 import { User } from "../../../packages/shared/user";
 
 interface AuthContextType {

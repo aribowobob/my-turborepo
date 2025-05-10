@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  TextField,
-  Button,
   Typography,
   InputAdornment,
   IconButton,
-  CircularProgress,
   Alert,
+  Box,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
+import { FormField } from "../../components/molecules/FormField";
+import { PrimaryButton } from "../../components/atoms/Button";
 
 import styles from "./login.module.css";
 
@@ -21,6 +21,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { signIn, loading, error } = useAuth();
   const router = useRouter();
@@ -29,8 +30,29 @@ export default function Login() {
     setShowPassword(!showPassword);
   };
 
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       await signIn(email, password);
@@ -38,6 +60,24 @@ export default function Login() {
     } catch (error: Error | unknown) {
       // Error state handled by Redux
       console.error("Login error:", error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "email") {
+      setEmail(value);
+    } else if (name === "password") {
+      setPassword(value);
+    }
+
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
     }
   };
 
@@ -61,14 +101,14 @@ export default function Login() {
         )}
 
         <form className={styles.loginForm} onSubmit={handleLogin}>
-          <TextField
+          <FormField
             label="Email"
-            variant="outlined"
-            fullWidth
-            required
-            type="email"
+            name="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleChange}
+            error={errors.email}
+            type="email"
+            required
             slotProps={{
               input: {
                 startAdornment: (
@@ -80,14 +120,14 @@ export default function Login() {
             }}
           />
 
-          <TextField
+          <FormField
             label="Password"
-            variant="outlined"
-            fullWidth
-            required
-            type={showPassword ? "text" : "password"}
+            name="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleChange}
+            error={errors.password}
+            type={showPassword ? "text" : "password"}
+            required
             slotProps={{
               input: {
                 startAdornment: (
@@ -110,21 +150,17 @@ export default function Login() {
             }}
           />
 
-          <div className={styles.loginButtonContainer}>
-            <Button
+          <Box className={styles.loginButtonContainer}>
+            <PrimaryButton
               type="submit"
-              variant="contained"
               fullWidth
               size="large"
               disabled={loading}
+              isLoading={loading}
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Login"
-              )}
-            </Button>
-          </div>
+              {loading ? "Logging in..." : "Login"}
+            </PrimaryButton>
+          </Box>
         </form>
 
         <div className={styles.loginFooter}>

@@ -1,9 +1,10 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { FormTextField } from "../atoms/FormTextField";
+import { FormTextField, FormTextFieldProps } from "../atoms/FormTextField";
 
-interface FormFieldProps {
+interface FormFieldProps
+  extends Omit<FormTextFieldProps, "error" | "helperText"> {
   label: string;
   name: string;
   value: string;
@@ -23,14 +24,15 @@ export const FormField: React.FC<FormFieldProps> = ({
   disabled = false,
   type = "text",
   required = false,
+  ...props
 }) => {
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 1 }}>
       <Typography
         variant="subtitle2"
         component="label"
         htmlFor={name}
-        sx={{ mb: 1, display: "block" }}
+        sx={{ display: "block" }}
       >
         {label} {required && <span style={{ color: "red" }}>*</span>}
       </Typography>
@@ -44,11 +46,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         error={!!error}
         helperText={error}
         required={required}
-        InputProps={{
-          sx: {
-            backgroundColor: disabled ? "rgba(0, 0, 0, 0.04)" : "transparent",
-          },
-        }}
+        {...props}
       />
     </Box>
   );
