@@ -93,37 +93,3 @@ my-turborepo/
 ├── turbo.json            # Turborepo configuration
 └── package.json          # Root package.json
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Firebase Emulator fails to start**
-
-   If you encounter this error when starting the Firebase Emulator:
-
-   ```
-   ⬢  functions: Failed to load function definition from source: FirebaseError: `runtime` field is required
-   ```
-
-   Run the fix script:
-
-   ```bash
-   ./fix-firebase-emulator.sh
-   ```
-
-2. **Ports already in use**
-
-   If you see errors about ports being in use, you may have another service running on the same port. You can either:
-
-   - Stop the other service
-   - Change the port in the configuration (e.g., in .env files)
-   - Kill all Node.js processes with: `killall node`
-
-3. **Frontend can't connect to backend**
-
-   Ensure that your `.env.local` file in the frontend directory has the correct backend URL:
-
-   ```
-   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
-   ```
