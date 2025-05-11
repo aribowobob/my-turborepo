@@ -35,7 +35,7 @@ import { useRouter } from "next/navigation";
 import { UpdateProfileForm } from "../components/organisms/UpdateProfileForm";
 import { PrimaryButton } from "../components/atoms/Button";
 import { useAppDispatch } from "../store/hooks";
-import { getUserData, updateUserData } from "../store/actions";
+import { getUserData, updateUserData, clearError } from "../store/actions";
 import { useSnackbarContext } from "@/context/SnackbarContext";
 
 export default function Home() {
@@ -64,6 +64,8 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await logout();
+      // Clear error state before navigation
+      dispatch(clearError());
       router.push("/login");
     } catch (error) {
       showSnackbar("Failed to logout", "error");
@@ -184,7 +186,7 @@ export default function Home() {
           <Grid size={{ xs: 12 }}>
             <Paper sx={{ p: 3, display: "flex", flexDirection: "column" }}>
               <Typography variant="h4" gutterBottom>
-                Welcome, {user?.name || user?.email?.split("@")[0] || "User"}!
+                Welcome, {user?.name || user?.email?.split("@")[0] || ""}!
               </Typography>
               <Typography variant="body1">
                 This is your personal dashboard. Here you can manage your

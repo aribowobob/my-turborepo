@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -20,6 +20,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { FormField } from "@/components/molecules/FormField";
 import { PrimaryButton } from "@/components/atoms/Button";
+import { useAppDispatch } from "@/store/hooks";
+import { clearError } from "@/store/actions";
 
 import styles from "./register.module.css";
 
@@ -34,6 +36,12 @@ export default function Register() {
 
   const { signUp, loading, error } = useAuth();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    // Clear Redux error state when component mounts
+    dispatch(clearError());
+  }, [dispatch]);
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -87,6 +95,8 @@ export default function Register() {
 
     try {
       await signUp(email, name, password);
+      // Clear error state before navigation
+      dispatch(clearError());
       // Redirect to login page after successful registration
       router.push("/login");
     } catch (error: Error | unknown) {
@@ -257,6 +267,7 @@ export default function Register() {
             <Link
               href="/login"
               style={{ fontWeight: "bold", color: "var(--foreground)" }}
+              onClick={() => dispatch(clearError())}
             >
               Login
             </Link>

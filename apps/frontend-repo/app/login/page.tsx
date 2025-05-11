@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,6 +14,8 @@ import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useAuth } from "@/context/AuthContext";
 import { FormField } from "@/components/molecules/FormField";
 import { PrimaryButton } from "@/components/atoms/Button";
+import { useAppDispatch } from "@/store/hooks";
+import { clearError } from "@/store/actions";
 
 import styles from "./login.module.css";
 
@@ -25,6 +27,12 @@ export default function Login() {
 
   const { signIn, loading, error } = useAuth();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    // Clear Redux error state when component mounts
+    dispatch(clearError());
+  }, [dispatch]);
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -56,6 +64,8 @@ export default function Login() {
 
     try {
       await signIn(email, password);
+      // Clear error state before navigation
+      dispatch(clearError());
       router.push("/");
     } catch (error: Error | unknown) {
       const errorMessage =
@@ -172,6 +182,7 @@ export default function Login() {
             <Link
               href="/register"
               style={{ fontWeight: "bold", color: "var(--foreground)" }}
+              onClick={() => dispatch(clearError())}
             >
               Register
             </Link>
