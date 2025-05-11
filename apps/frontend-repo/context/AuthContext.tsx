@@ -6,12 +6,13 @@ import {
   getUserData,
   login as loginAction,
   logout as logoutAction,
+  register as registerAction,
 } from "@/store/actions";
 import { User } from "../../../packages/shared/user";
 
 interface AuthContextType {
   signIn: (email: string, password: string) => Promise<User>;
-  signUp: () => Promise<User>;
+  signUp: (email: string, name: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
 }
 
@@ -58,9 +59,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (): Promise<User> => {
-    // This would need to be implemented with a backend registration endpoint
-    throw new Error("Sign up not implemented");
+  const signUp = async (
+    email: string,
+    name: string,
+    password: string
+  ): Promise<User> => {
+    const resultAction = await dispatch(
+      registerAction({ email, name, password })
+    );
+
+    if (registerAction.fulfilled.match(resultAction)) {
+      return resultAction.payload;
+    } else {
+      throw new Error(
+        (resultAction.payload as string) || "Registration failed"
+      );
+    }
   };
 
   const logout = async (): Promise<void> => {

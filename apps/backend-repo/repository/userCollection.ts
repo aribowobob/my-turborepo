@@ -1,5 +1,6 @@
 import { db } from "../config/firebaseConfig";
 import { User } from "../entities/user";
+import { hash } from "bcrypt";
 
 const USERS_COLLECTION = "USERS";
 
@@ -58,6 +59,42 @@ export const userCollection = {
       return { id: userDoc.id, ...userDoc.data() } as User;
     } catch (error) {
       console.error("Error fetching user by email:", error);
+      throw error;
+    }
+  },
+
+  async createUser(
+    userData: Omit<User, "id" | "createdAt" | "updatedAt">
+  ): Promise<User> {
+    try {
+      // Check if email already exists
+      const existingUser = await this.getUserByEmail(userData.email);
+      if (existingUser) {
+        throw new Error("User with this email already exists");
+      }
+
+      // Hash the password
+      const hashedPassword = await hash(userData.password || "", 10);
+
+      // Prepare user data with timestamps
+      const now = new Date().toISOString();
+      const newUserData = {
+        ...userData,
+        password: hashedPassword,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      // Add user to collection
+      const docRef = await db.collection(USERS_COLLECTION).add(newUserData);
+
+      // Get the created user
+      const userDoc = await docRef.get();
+
+      // Return user data with ID
+      return { id: userDoc.id, ...userDoc.data() } as User;
+    } catch (error) {
+      console.error("Error creating user:", error);
       throw error;
     }
   },

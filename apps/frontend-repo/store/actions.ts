@@ -212,3 +212,54 @@ export const updateUserData = createAsyncThunk(
     }
   }
 );
+
+export const register = createAsyncThunk(
+  "auth/register",
+  async (
+    {
+      email,
+      name,
+      password,
+    }: { email: string; name: string; password: string },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      dispatch(setLoading(true));
+      dispatch(clearError());
+
+      const response = await fetch(`${backendUrl}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, name, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        dispatch(setLoading(false));
+        dispatch(setError(errorData.message || "Registration failed"));
+        return rejectWithValue(errorData.message || "Registration failed");
+      }
+
+      const data = await response.json();
+
+      // Set the auth token in cookies
+      Cookies.set("auth-token", data.token, { expires: 7 }); // expires in 7 days
+
+      // Update state
+      dispatch(setUser(data.user));
+      dispatch(setLoading(false));
+
+      return data.user;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Registration failed";
+
+      dispatch(setLoading(false));
+      dispatch(setError(errorMessage));
+
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
