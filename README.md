@@ -23,6 +23,7 @@ npm install
 ### Environment Setup
 
 1. For the backend, create a `.env` file in the `apps/backend-repo/` directory based on `.env.example`:
+
    ```
    NODE_ENV=development
    FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
@@ -31,89 +32,54 @@ npm install
    PORT=3001
    ```
 
-2. For the frontend, create a `.env.local` file in the `apps/frontend-repo/` directory if needed.
+2. For the frontend, create a `.env.local` file in the `apps/frontend-repo/` directory based on `.env.example`:
 
-## Running the Project
+   ```
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+   ```
 
-### Development Mode
-
-To run all applications and packages in development mode:
+## Running the Project in Development Mode
 
 ```bash
 npm run dev
 ```
 
 This command will start:
+
 - Frontend (Next.js) at http://localhost:3000
 - Backend (Express) at http://localhost:3001
+- Firebase Emulator (Auth and Firestore) at various ports
+
+The `dev` script in the root package.json uses `concurrently` to run both services in parallel:
+
+- `turbo run dev --filter=frontend-repo`: Starts the Next.js frontend
+- `turbo run dev:emulator --filter=backend-repo`: Starts both the Express API server and Firebase Emulator
 
 #### Running Specific Applications
 
 If you only want to run a specific application:
 
 **Frontend:**
-```bash
-cd apps/frontend-repo
-npm run dev
-```
 
-**Backend:**
 ```bash
-cd apps/backend-repo
+# From root directory
+npm run dev:frontend
+
+# Or from the frontend directory
+cd apps/frontend-repo
 npm run dev
 ```
 
 **Backend with Firebase Emulator:**
+
 ```bash
+# From root directory
+npm run dev:backend
+
+# Or from the backend directory
 cd apps/backend-repo
 npm run dev:emulator
 ```
-Firebase Emulator will run at:
-- Auth: http://localhost:9099
-- Firestore: http://localhost:8080
-
-### Production Mode
-
-To build all applications for production:
-
-```bash
-npm run build
-```
-
-To run applications in production mode:
-
-**Frontend:**
-```bash
-cd apps/frontend-repo
-npm run start
-```
-
-**Backend:**
-```bash
-cd apps/backend-repo
-npm run start
-```
-
-## Turborepo Features
-
-### Local Caching
-
-Turborepo caches build outputs locally to speed up subsequent builds.
-
-### Remote Caching (Optional)
-
-To enable Remote Caching with Vercel:
-
-```bash
-npx turbo login
-npx turbo link
-```
-
-### Other Turborepo Commands
-
-- **Linting:** `npm run lint`
-- **Type Checking:** `npm run check-types`
-- **Formatting:** `npm run format`
 
 ## Project Structure
 
@@ -128,14 +94,36 @@ my-turborepo/
 └── package.json          # Root package.json
 ```
 
-## Useful Links
+## Troubleshooting
 
-- [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Firebase Documentation](https://firebase.google.com/docs)
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+### Common Issues
+
+1. **Firebase Emulator fails to start**
+
+   If you encounter this error when starting the Firebase Emulator:
+
+   ```
+   ⬢  functions: Failed to load function definition from source: FirebaseError: `runtime` field is required
+   ```
+
+   Run the fix script:
+
+   ```bash
+   ./fix-firebase-emulator.sh
+   ```
+
+2. **Ports already in use**
+
+   If you see errors about ports being in use, you may have another service running on the same port. You can either:
+
+   - Stop the other service
+   - Change the port in the configuration (e.g., in .env files)
+   - Kill all Node.js processes with: `killall node`
+
+3. **Frontend can't connect to backend**
+
+   Ensure that your `.env.local` file in the frontend directory has the correct backend URL:
+
+   ```
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+   ```

@@ -15,7 +15,15 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "outputs": [],
+      "inputs": []
+    },
+    "dev:emulator": {
+      "cache": false,
+      "persistent": true,
+      "outputs": [],
+      "inputs": []
     }
   }
 }
